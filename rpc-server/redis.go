@@ -47,11 +47,11 @@ func (c *RedisClient) SaveMessage(ctx context.Context, roomID string, message *M
 	return nil
 }
 
-func (c *RedisClient) GetMessagesByRoomID(ctx context.Context, roomID stirng, start end int64, reverse bool) ([]*Message, error){
+func (c *RedisClient) GetMessagesByRoomID(ctx context.Context, roomID string, start, end int64, reverse bool) ([]*Message, error) {
 	var (
-		rawMessage []string
-		messages []*Message
-		err error
+		rawMessages []string
+		messages    []*Message
+		err         error
 	)
 
 	if reverse {
@@ -61,7 +61,7 @@ func (c *RedisClient) GetMessagesByRoomID(ctx context.Context, roomID stirng, st
 		}
 	} else {
 		rawMessages, err = c.cli.ZRange(ctx, roomID, start, end).Result()
-		if err!= nil {
+		if err != nil {
 			return nil, err
 		}
 	}
