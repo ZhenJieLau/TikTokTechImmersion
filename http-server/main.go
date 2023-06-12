@@ -60,7 +60,7 @@ func sendMessage(ctx context.Context, c *app.RequestContext) {
 	} else if resp.Code != 0 {
 		c.String(consts.StatusInternalServerError, resp.Msg)
 	} else {
-		c.Status(consts.StatusOK)
+		c.String(consts.StatusOK, resp.Msg)
 	}
 }
 

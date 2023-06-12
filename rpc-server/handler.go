@@ -94,11 +94,16 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 func validateSendRequest(req *rpc.SendRequest) error {
 	senders := strings.Split(req.Message.Chat, ":")
 	if len(senders) != 2 {
-		err := fmt.Errorf("invalid Chat ID `%s`, should be in the format of user1:user2", req.Message.GetChat())
+		err := fmt.Errorf("invalid Chat ID `%s`, Chat ID should be in the format of user1:user2", req.Message.GetChat())
 		return err
 	}
 
 	sender1, sender2 := senders[0], senders[1]
+
+	if sender1 == sender2 {
+		err := fmt.Errorf("invalid Chat `%s`, user1 should not be the same as user2", req.Message.GetChat())
+		return err
+	}
 
 	if req.Message.GetSender() != sender1 && req.Message.GetSender() != sender2 {
 		err := fmt.Errorf("sender `%s` not in the chat room", req.Message.GetSender())
@@ -114,6 +119,7 @@ func getRoomID(chat string) (string, error) {
 
 	lowercase := strings.ToLower(chat)
 	senders := strings.Split(lowercase, ":")
+	//check for valid Chat ID
 	if len(senders) != 2 {
 		err := fmt.Errorf("invalid ChatID `%s`, should be in the format of user1:user2", chat)
 		return "", err
@@ -121,6 +127,13 @@ func getRoomID(chat string) (string, error) {
 
 	sender1, sender2 := senders[0], senders[1]
 
+	// sender1 should not be the same as sender2, ie sender1 can't talk to him/herself
+	if sender1 == sender2 {
+		err := fmt.Errorf("invalid Chat `%s`, user1 should not be the same as user2", chat)
+		return "", err
+	}
+
+	// store the Chat ID in fixed format, such that sender1 > sender2
 	if comp := strings.Compare(sender1, sender2); comp == 1 {
 		roomID = fmt.Sprintf("%s:%s", sender2, sender1)
 	} else {
